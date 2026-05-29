@@ -4,10 +4,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import cl.duoc.clientes.repository.ClienteRepository;
 import cl.duoc.clientes.dto.UpdateRequestCliente;
+import cl.duoc.clientes.exception.ResourceNotFoundException;
 import cl.duoc.clientes.mapper.ClienteMapper;
 import cl.duoc.clientes.model.Cliente;
 import java.util.List;
 import org.springframework.web.reactive.function.client.WebClient;
+import java.util.Optional;
+
 @Service
 
 public class ClienteService {
@@ -66,10 +69,17 @@ public Cliente login(String correo, String password) {
 
 
     // ELIMINAR
-    public void deleteCliente(int id){
+    public boolean deleteCliente(int id) {
+    Optional<Cliente> clienteOpt = clienteRepository.findById(id);
 
-        clienteRepository.deleteById((int) id);
+    if (clienteOpt.isPresent()) {
+        clienteRepository.delete(clienteOpt.get());
+        return true;
+    } else {
+        throw new ResourceNotFoundException("Cliente con id=" + id + " no encontrado");
     }
+}
+
 
     // BUSCAR POR ROL
     public List<Cliente> buscarPorRol(String rol){

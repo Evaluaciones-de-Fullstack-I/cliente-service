@@ -20,7 +20,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus; 
 import cl.duoc.clientes.exception.ResourceNotFoundException;
 import org.springframework.web.reactive.function.client.WebClient;
-
+import org.springframework.web.server.ResponseStatusException;
 import cl.duoc.clientes.dto.LoginRequest;
 import cl.duoc.clientes.dto.UpdateRequestCliente;
 @RestController
@@ -51,12 +51,15 @@ public ResponseEntity<List<Cliente>> listarClientes() {
    }
    //creacion de clientes
 @PostMapping
- public ResponseEntity<Cliente> agregarCliente(@Valid@RequestBody CreateRequestCliente request) {
-          Cliente nuevoCliente = clienteService.saveCliente(ClienteMapper.toCliente(request));
-          return ResponseEntity.status(HttpStatus.CREATED).body(nuevoCliente);
- 
- 
-        }
+  public ResponseEntity<Map<String, Object>> agregarCliente(@Valid @RequestBody CreateRequestCliente request) {
+        Cliente nuevoCliente = clienteService.saveCliente(ClienteMapper.toCliente(request));
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("mensaje", "Cliente creado correctamente");
+        response.put("id", nuevoCliente.getId());
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
 //cliente historico inicia sesion
 @PostMapping("/login")
 public ResponseEntity<Cliente> login(
@@ -75,86 +78,83 @@ public ResponseEntity<Cliente> login(
         
 //buscar cliente por id
  @GetMapping("/{id}")
-     public ResponseEntity<Cliente> buscarCliente(
-            @PathVariable int id
-    ) {
+    public ResponseEntity<Cliente> buscarCliente(@PathVariable int id) {
+        Cliente cliente = clienteService.getClienteId(id);
 
-       Cliente cliente = clienteService.getClienteId(id);
-
-        if(cliente == null){
-
-            throw new ResourceNotFoundException("Cliente no encontrado por id: " + id);
+        if (cliente == null) {
+            throw new ResourceNotFoundException("Cliente con id=" + id + " no encontrado");
         }
         return ResponseEntity.ok(cliente);
     }
 //actualizar cliente por id
 
 @PutMapping("{id}")
-public ResponseEntity<Cliente> actualizarCliente(
-        @PathVariable int id,
-        @Valid @RequestBody UpdateRequestCliente request
-) {
-    Cliente clienteActualizado = clienteService.updateCliente(id, request);
-    return ResponseEntity.ok(clienteActualizado);
-}
+public ResponseEntity<Map<String, Object>> actualizarCliente(
+            @PathVariable int id,
+            @Valid @RequestBody UpdateRequestCliente request
+    ) {
+        Cliente clienteActualizado = clienteService.updateCliente(id, request);
 
+        if (clienteActualizado == null) {
+            throw new ResourceNotFoundException("Cliente con id=" + id + " no encontrado");
+        }
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("mensaje", "Cliente actualizado correctamente");
+        response.put("id", clienteActualizado.getId());
+
+        return ResponseEntity.ok(response);}
 
  // ELIMINAR CLIENTE
-    @DeleteMapping("{id}")
-    public ResponseEntity<Void> eliminarCliente(
-            @PathVariable int id
-    ) {
+    public ResponseEntity<Map<String, String>> eliminarCliente(@PathVariable int id) {
+        boolean eliminado = clienteService.deleteCliente(id);
 
-        clienteService.deleteCliente(id);
+        if (!eliminado) {
+            throw new ResourceNotFoundException("Cliente con id=" + id + " no encontrado");
+        }
 
-        return ResponseEntity.noContent().build();
+        Map<String, String> response = new HashMap<>();
+        response.put("mensaje", "Cliente eliminado correctamente");
+
+        return ResponseEntity.ok(response);
     }
-    
+  
     // BUSCAR POR ROL
     @GetMapping("/rol/{rol}")
-    public ResponseEntity<List<Cliente>> buscarPorRol(
-            @PathVariable String rol
-    ) {
 
-        List<Cliente> clientes =
-                clienteService.buscarPorRol(rol);
-
+    public ResponseEntity<List<Cliente>> buscarPorRol(@PathVariable String rol) {
+        List<Cliente> clientes = clienteService.buscarPorRol(rol);
         return ResponseEntity.ok(clientes);
-    } 
+    }
 // BUSCAR POR CORREO
-    @GetMapping("/buscar")
-    public ResponseEntity<Cliente> buscarPorCorreo(
-            @RequestParam String correo
-    ) {
+  @GetMapping("/buscar")
+public ResponseEntity<Map<String, Object>> buscarPorCorreo(@RequestParam String correo) {
+    Cliente cliente = clienteService.buscarPorCorreo(correo);
 
-        Cliente cliente =
-                clienteService.buscarPorCorreo(correo);
-
-        return ResponseEntity.ok(cliente);
+    if (cliente == null) {
+        throw new ResourceNotFoundException("Cliente con correo=" + correo + " no encontrado");
     }
 
+    Map<String, Object> response = new HashMap<>();
+    response.put("mensaje", "Cliente encontrado correctamente");
+    response.put("id", cliente.getId());
+    response.put("correo", cliente.getCorreo());
+
+    return ResponseEntity.ok(response);
+}
 //filtrar por administradores
 
 @GetMapping("/admins")
-public ResponseEntity<List<Cliente>> obtenerAdmins(){
+public ResponseEntity<Map<String, Object>> obtenerAdmins() {
+    List<Cliente> admins = clienteService.obtenerAdmins();
 
-    List<Cliente> admins =
-            clienteService.obtenerAdmins();
+    Map<String, Object> response = new HashMap<>();
+    response.put("mensaje", "Administradores obtenidos correctamente");
+    response.put("total", admins.size());
+    response.put("admins", admins);
 
-    return ResponseEntity.ok(admins);
+    return ResponseEntity.ok(response);
 }
-//verificar si existe el correo 
-@GetMapping("/existe")
-public ResponseEntity<Boolean> existeCorreo(
-        @RequestParam String correo
-){
-
-    boolean existe =
-            clienteService.existeCorreo(correo);
-
-    return ResponseEntity.ok(existe);
-}
-
 }
 
 

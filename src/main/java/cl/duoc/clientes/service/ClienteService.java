@@ -3,29 +3,30 @@ package cl.duoc.clientes.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import cl.duoc.clientes.repository.ClienteRepository;
+import cl.duoc.clientes.dto.UpdateRequestCliente;
+import cl.duoc.clientes.mapper.ClienteMapper;
 import cl.duoc.clientes.model.Cliente;
 import java.util.List;
 import org.springframework.web.reactive.function.client.WebClient;
 @Service
 
 public class ClienteService {
-    @Autowired//inicializa  para el constructor en el momento de crear el objeto
+    //inicializa  para el constructor en el momento de crear el objeto
     private ClienteRepository clienteRepository;
-    
-    private WebClient webClient;
-
-    public ClienteService(ClienteRepository clienteRepository) {
+    private final WebClient webClient;
+   
+     public ClienteService(ClienteRepository clienteRepository, WebClient webClient) {
         this.clienteRepository = clienteRepository;
+        this.webClient = webClient;
     }
-public List<Cliente> getAllClientes() {
-        return clienteRepository.findAll();
-    }
+
+   
     // LISTAR
     public List<Cliente> getClientes(){
 
         return clienteRepository.findAll();
     }
-// LOGIN
+// LOGIN SIMULACION A LA API LEGACY 
 public Cliente login(String correo, String password) {
 
     return webClient.post()
@@ -51,10 +52,18 @@ public Cliente login(String correo, String password) {
     }
 
     // ACTUALIZAR
-    public Cliente updateCliente(Cliente cliente){
+   public Cliente updateCliente(int id, UpdateRequestCliente request) {
 
-        return clienteRepository.save(cliente);
-    }
+    Cliente cliente = clienteRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Cliente no encontrado"));
+
+    ClienteMapper.updateCliente(cliente, request);
+
+    return clienteRepository.save(cliente);
+}
+
+
+
 
     // ELIMINAR
     public void deleteCliente(int id){

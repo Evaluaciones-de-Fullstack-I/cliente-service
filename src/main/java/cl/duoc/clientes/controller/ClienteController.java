@@ -42,10 +42,7 @@ public ClienteController(
 }
 
 //listar clientes
-@GetMapping
-public List<Cliente> getAllClientes(){
-    return this.clienteService.getAllClientes();
-}
+
 @GetMapping
 public ResponseEntity<List<Cliente>> listarClientes() {
     List<Cliente> clientes = clienteService.getClientes();
@@ -91,18 +88,17 @@ public ResponseEntity<Cliente> login(
         return ResponseEntity.ok(cliente);
     }
 //actualizar cliente por id
+
 @PutMapping("{id}")
-    public ResponseEntity<Cliente> actualizarCliente(@PathVariable int id,
+public ResponseEntity<Cliente> actualizarCliente(
+        @PathVariable int id,
         @Valid @RequestBody UpdateRequestCliente request
-    ) {
+) {
+    Cliente clienteActualizado = clienteService.updateCliente(id, request);
+    return ResponseEntity.ok(clienteActualizado);
+}
 
-        Cliente clienteActualizado =
-                clienteService.updateCliente(
-                        ClienteMapper.toCliente(id,request)
-                );
 
-        return ResponseEntity.ok(clienteActualizado);
-    }   
  // ELIMINAR CLIENTE
     @DeleteMapping("{id}")
     public ResponseEntity<Void> eliminarCliente(

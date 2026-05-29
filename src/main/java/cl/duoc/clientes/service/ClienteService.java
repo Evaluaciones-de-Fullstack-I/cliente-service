@@ -10,6 +10,8 @@ import cl.duoc.clientes.model.Cliente;
 import java.util.List;
 import org.springframework.web.reactive.function.client.WebClient;
 import java.util.Optional;
+import java.util.Map;
+import java.util.HashMap;
 
 @Service
 
@@ -30,13 +32,44 @@ public class ClienteService {
         return clienteRepository.findAll();
     }
 // LOGIN SIMULACION A LA API LEGACY 
+
 public Cliente login(String correo, String password) {
 
-    return webClient.post()
-            .uri("http://legacy-system/login")
-            .retrieve()
-            .bodyToMono(Cliente.class)
-            .block();
+    Cliente cliente = clienteRepository.findByCorreo(correo);
+
+    if (cliente == null) {
+        throw new RuntimeException("Cliente no encontrado");
+    }
+
+    // CLIENTE LEGACY  -PEDRO
+    if (cliente.getTipoCliente().equals("LEGACY")) {
+
+        Cliente legacyCliente = webClient.post()
+                .uri("http://localhost:8080/legacy/login")
+                .bodyValue(Map.of(
+                        "correo", correo,
+                        "password", password
+                ))
+                .retrieve()
+                .bodyToMono(Cliente.class)
+                .block();
+
+        if (legacyCliente == null) {
+            throw new RuntimeException("Credenciales legacy inválidas");
+        }
+
+        return legacyCliente;
+    }
+
+    // CLIENTE ANTIGUO  - MARIA
+
+    if (cliente.getPassword() != null &&
+    cliente.getPassword().equals(password)) {
+
+    return cliente;
+}
+ throw new RuntimeException("Credenciales inválidas");
+
 }
 
 

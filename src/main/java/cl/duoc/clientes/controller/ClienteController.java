@@ -23,6 +23,10 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.server.ResponseStatusException;
 import cl.duoc.clientes.dto.LoginRequest;
 import cl.duoc.clientes.dto.UpdateRequestCliente;
+import java.util.Map;
+import java.util.HashMap;
+
+
 @RestController
 @RequestMapping("/api/v1/clientes")
 
@@ -60,7 +64,7 @@ public ResponseEntity<List<Cliente>> listarClientes() {
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
-//cliente historico inicia sesion
+//cliente historico inicia sesion/////////////////////
 @PostMapping("/login")
 public ResponseEntity<Cliente> login(
         @RequestBody LoginRequest request
@@ -106,6 +110,8 @@ public ResponseEntity<Map<String, Object>> actualizarCliente(
         return ResponseEntity.ok(response);}
 
  // ELIMINAR CLIENTE
+
+ @DeleteMapping("/{id}")
     public ResponseEntity<Map<String, String>> eliminarCliente(@PathVariable int id) {
         boolean eliminado = clienteService.deleteCliente(id);
 

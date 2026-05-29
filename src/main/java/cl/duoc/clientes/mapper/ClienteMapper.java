@@ -17,8 +17,15 @@ public class ClienteMapper {
         cliente.setCorreo(request.correo());
         cliente.setRol(request.rol());
 
+        
+    
+
+        cliente.setTipoCliente("CLIENTES ANTIGUOS");
+
         return cliente;
-    }
+}
+
+
 
     // UPDATE
     public static void updateCliente(

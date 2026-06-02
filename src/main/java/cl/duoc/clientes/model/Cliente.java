@@ -23,6 +23,10 @@ public class Cliente {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private int id;
+    
+    @Column(name = "tipo_cliente", nullable = false, length = 20)
+    private String tipoCliente;
+
 
     @Column(name = "nombre", nullable = false, length = 100)
     private String nombre;

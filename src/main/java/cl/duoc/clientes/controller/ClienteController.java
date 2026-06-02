@@ -23,8 +23,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.server.ResponseStatusException;
 import cl.duoc.clientes.dto.LoginRequest;
 import cl.duoc.clientes.dto.UpdateRequestCliente;
-import java.util.Map;
-import java.util.HashMap;
 
 
 @RestController
@@ -161,6 +159,43 @@ public ResponseEntity<Map<String, Object>> obtenerAdmins() {
 
     return ResponseEntity.ok(response);
 }
+
+
+//co}municacion con carrito
+
+@PostMapping("/{clienteId}/agregar-carrito")
+public ResponseEntity<String> agregarAlCarrito(
+        @PathVariable Integer clienteId
+) {
+
+    try {
+
+     System.out.println(" CLIENTE enviando productos al CARRITO");
+
+        Map<String, Object> carrito = new HashMap<>();
+        carrito.put("clienteId", clienteId);
+        carrito.put("productoId", 10);
+        carrito.put("cantidad", 2);
+        carrito.put("subtotal", 20000);
+        carrito.put("estado", "ACTIVO");
+
+        webClient.post()
+                .uri("http://localhost:8086/api/v1/carritos")
+                .bodyValue(carrito)
+                .retrieve()
+                .bodyToMono(String.class)
+                .block();
+        System.out.println("📨 CLIENTE recibió respuesta de CARRITO");
+        return ResponseEntity.ok("Producto agregado al carrito");
+
+    } catch (Exception e) {
+e.printStackTrace();
+        return ResponseEntity.badRequest()
+                .body("Error al comunicarse con carrito");
+    }
+}
+
+
 }
 
 

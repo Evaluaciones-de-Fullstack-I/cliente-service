@@ -161,35 +161,30 @@ public ResponseEntity<Map<String, Object>> obtenerAdmins() {
 }
 
 
-//co}municacion con carrito
+//comunicacion con carrito
 
-@PostMapping("/{clienteId}/agregar-carrito")
+@PostMapping("/{clienteId}/carrito")
 public ResponseEntity<String> agregarAlCarrito(
         @PathVariable Integer clienteId
 ) {
 
+
     try {
-
-     System.out.println(" CLIENTE enviando productos al CARRITO");
-
-        Map<String, Object> carrito = new HashMap<>();
-        carrito.put("clienteId", clienteId);
-        carrito.put("productoId", 10);
-        carrito.put("cantidad", 2);
-        carrito.put("subtotal", 20000);
-        carrito.put("estado", "ACTIVO");
-
         webClient.post()
                 .uri("http://localhost:8086/api/v1/carritos")
-                .bodyValue(carrito)
+                .bodyValue(Map.of(
+                        "clienteId", clienteId,
+                        "productoId", 1, // Ejemplo de producto
+                        "cantidad", 1
+                ))
                 .retrieve()
                 .bodyToMono(String.class)
                 .block();
-        System.out.println("📨 CLIENTE recibió respuesta de CARRITO");
+        System.out.println(" CLIENTE recibió respuesta de CARRITO");
         return ResponseEntity.ok("Producto agregado al carrito");
 
     } catch (Exception e) {
-e.printStackTrace();
+
         return ResponseEntity.badRequest()
                 .body("Error al comunicarse con carrito");
     }

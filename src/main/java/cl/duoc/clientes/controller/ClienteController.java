@@ -14,14 +14,13 @@ import org.springframework.web.reactive.function.client.WebClient;
 import cl.duoc.clientes.dto.LoginRequest;
 import cl.duoc.clientes.dto.UpdateRequestCliente;
 
-
-
 // 🟢 IMPORTACIONES DE OPENAPI / SWAGGER
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+
 
 @RestController
 @RequestMapping("/api/v1/clientes")
@@ -227,7 +226,7 @@ public class ClienteController {
     public ResponseEntity<String> agregarAlCarrito(@PathVariable Integer clienteId) {
         try {
             webClient.post()
-                    .uri("http://localhost:8086/api/v1/carritos")
+                    .uri("https://carrito-service-ma25.onrender.com")
                     .bodyValue(Map.of(
                             "clienteId", clienteId,
                             "productoId", 1, 
